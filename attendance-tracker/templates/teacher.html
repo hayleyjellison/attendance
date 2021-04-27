@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/teacher.css', _external=True) }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: white">
+        <img class="mb-4" src="{{ url_for('static', filename='images/H.png', _external=True) }}" alt="" style="width:200px; height:auto;" href='#'>
+    </nav>
+
+{% for class in classes %}
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">{{ class['class_name'] }} </h5>
+      <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+      <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+    </div>
+  </div>
+{% endfor %}
+</body>
+</html>

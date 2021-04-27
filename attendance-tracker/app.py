@@ -35,8 +35,6 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(BASE_DIR, "C:\\Users\\hayleyjellison\\Desktop\\Presidio\\attendance-test\\Belly_Button_Biodiversity\\db\\Attendance.sqlite")
 
 def validate(username, password):
-    # con = sql.connect("C:\\Users\\hayleyjellison\\Desktop\\Presidio\\attendance-test\\Belly_Button_Biodiversity\\db\\Attendance.sqlite")
-    # con = sql.connect("sqlite:///db/Attendance.sqlite")
     con = sql.connect(db_path)
     completion = False
     pos = ''
@@ -65,6 +63,11 @@ def validate(username, password):
                         pos='Student'
     return completion, pos 
 
+def get_db_connection():
+    con = sql.connect(db_path)
+    con.row_factory = sql.Row
+    return con
+
 @app.route("/", methods=['GET', 'POST'])
 def index():
     error = None
@@ -83,11 +86,19 @@ def index():
 
 @app.route('/teacher/')
 def teacher():
-    return "Teacher has logged in"
+
+    conn = get_db_connection()
+    classes = conn.execute('SELECT * FROM classes').fetchall()
+    conn.close()
+    return render_template('teacher.html', classes=classes)
+
 
 @app.route('/student/')
 def student():
-    return "Student has logged in"
+    conn = get_db_connection()
+    classes = conn.execute('SELECT * FROM classes').fetchall()
+    conn.close()
+    return render_template('student.html', classes=classes)
 
 
 if __name__ == "__main__":
