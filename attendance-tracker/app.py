@@ -19,6 +19,7 @@ app = Flask(__name__)
 #################################################
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db/Attendance.sqlite"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
 # reflect an existing database into a new model
@@ -135,8 +136,28 @@ def student(sid):
     conn = get_db_connection()
     studentclass = conn.execute(f"SELECT class_id FROM studentclass WHERE student_id = {sid}")
     class_name=conn.execute(f"SELECT * FROM classes WHERE class_id IN (SELECT class_id FROM studentclass WHERE student_id = {sid})").fetchall()
+    class_attendance=conn.execute(f"SELECT * FROM studentattendance WHERE class_id IN (SELECT class_id FROM studentclass WHERE student_id = {sid})").fetchall()
+    # num_attend =conn.execute(f"SELECT AVG(present) AS AVG FROM studentattendance WHERE class_id IN (SELECT class_id FROM studentclass WHERE student_id = {sid})").fetchall()
+    num_attend = []
+    for clss in class_name:
+        temp =conn.execute(f"SELECT AVG(present) AS AVG FROM studentattendance WHERE class_id = {clss['class_id']} AND student_id = {sid}").fetchall()
+        num_attend.append(temp[0]['AVG']*100)
     conn.close()
-    return render_template('student.html', class_name=class_name)
+    names = []
+    for clss in class_name:
+        temp = {}
+        temp['class'] = clss['class_name']
+        names.append(temp)
+    attendance = []
+    # for attend in num_attend:
+    #     temp = {}
+    #     temp['attendance'] = attend['AVG']
+    #     attendance.append(temp)
+    print(names, num_attend)
+    class_list = {'class_name':names,'attendance':num_attend}
+    print(class_list)
+    n = len(class_list)
+    return render_template('student.html', class_name=class_name,class_attendance=class_attendance,num_attend=num_attend,class_list=class_list,n=n)
 
 
 if __name__ == "__main__":

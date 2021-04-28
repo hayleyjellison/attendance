@@ -13,12 +13,21 @@
         <img class="mb-4" src="{{ url_for('static', filename='images/H.png', _external=True) }}" alt="" style="width:200px; height:auto;" href='#'>
     </nav>
 
-    {% for class in class_name %}
-    <div class="card">
+    {% for i in range(n+1) %}
+    <div class="card" style="padding-left: 70px;">
       <div class="card-body">
-        <h5 class="card-title">{{ class['class_name'] }} </h5>
-        <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-        <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+        <h5 class="card-title">{{ class_list['class_name'][i]['class'] }} </h5>
+        <p class="card-text"> {{ class_list['attendance'][i]|round }}%</p>
+        <p class="card-text"><small class="text-muted">
+            <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+            <label class="form-check-label" for="flexCheckDefault">
+              <div class="col-12">
+                <button class="btn btn-primary" type="submit">Submit Attendance</button>
+              </div>
+            </label>
+
+          </div></small></p>
       </div>
     </div>
   {% endfor %}
