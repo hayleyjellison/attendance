@@ -52,6 +52,7 @@ def validate(username, password):
                 rows = cur.fetchall()
                 results = db.session.query(*sel).filter(User_data.email == username).all()
                 for row in results:
+                    dbID = row[0]
                     dbUser = row[3]
                     dbPass = row[4]
                     dbRole = row[5]
@@ -62,6 +63,43 @@ def validate(username, password):
                         completion=True
                         pos='Student'
     return completion, pos 
+
+def getID(username):
+    con = sql.connect(db_path)
+    with con:
+                cur = con.cursor()
+                sel = [
+                    User_data.user_id,
+                    User_data.first_name,
+                    User_data.last_name,
+                    User_data.email,
+                    User_data.password,
+                    User_data.role
+                ]
+                cur.execute("SELECT * FROM user")
+                rows = cur.fetchall()
+                results = db.session.query(*sel).filter(User_data.email == username).all()
+                for row in results:
+                    dbID = row[0]
+    return dbID
+
+def getClassName(class_id):
+    con = sql.connect(db_path)
+    with con:
+                cur = con.cursor()
+                sel = [
+                    Class_data.class_id,
+                    Class_data.class_name,
+                    Class_data.section,
+                    Class_data.start_time,
+                    Class_data.end_time
+                ]
+                cur.execute("SELECT * FROM classes")
+                rows = cur.fetchall()
+                results = db.session.query(*sel).filter(User_data.email == username).all()
+                for row in results:
+                    dbClassName = row[1]
+    return dbClassName
 
 def get_db_connection():
     con = sql.connect(db_path)
@@ -79,26 +117,26 @@ def index():
             error = 'Invalid Credentials. Please try again.'
         else:
             if pos == "Teacher":
-                return redirect(url_for('teacher'))
+                return redirect(url_for('teacher',tid=getID(email)))
             elif pos == "Student":
-                return redirect(url_for('student'))
+                return redirect(url_for('student',sid=getID(email)))
     return render_template('index.html', error=error)
 
-@app.route('/teacher/')
-def teacher():
-
+@app.route('/teacher/<tid>')
+def teacher(tid):
     conn = get_db_connection()
-    classes = conn.execute('SELECT * FROM classes').fetchall()
+    teacherclass = conn.execute(f"SELECT * FROM classes WHERE teacher_id = {tid}").fetchall()
     conn.close()
-    return render_template('teacher.html', classes=classes)
+    return render_template('teacher.html', teacherclass=teacherclass)
 
 
-@app.route('/student/')
-def student():
+@app.route('/student/<sid>')
+def student(sid):
     conn = get_db_connection()
-    classes = conn.execute('SELECT * FROM classes').fetchall()
+    studentclass = conn.execute(f"SELECT class_id FROM studentclass WHERE student_id = {sid}")
+    class_name=conn.execute(f"SELECT * FROM classes WHERE class_id IN (SELECT class_id FROM studentclass WHERE student_id = {sid})").fetchall()
     conn.close()
-    return render_template('student.html', classes=classes)
+    return render_template('student.html', class_name=class_name)
 
 
 if __name__ == "__main__":

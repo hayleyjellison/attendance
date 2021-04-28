@@ -13,7 +13,7 @@
         <img class="mb-4" src="{{ url_for('static', filename='images/H.png', _external=True) }}" alt="" style="width:200px; height:auto;" href='#'>
     </nav>
 
-{% for class in classes %}
+{% for class in teacherclass %}
   <div class="card">
     <div class="card-body">
       <h5 class="card-title">{{ class['class_name'] }} </h5>
