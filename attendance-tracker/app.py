@@ -127,8 +127,26 @@ def index():
 def teacher(tid):
     conn = get_db_connection()
     teacherclass = conn.execute(f"SELECT * FROM classes WHERE teacher_id = {tid}").fetchall()
+    class_name=conn.execute(f"SELECT * FROM classes WHERE class_id IN (SELECT class_id FROM teacherclass WHERE teacher_id = {tid})").fetchall()
+    class_attendance=conn.execute(f"SELECT * FROM studentattendance WHERE class_id IN (SELECT class_id FROM teacherclass WHERE teacher_id = {tid})").fetchall()
+    # num_attend =conn.execute(f"SELECT AVG(present) AS AVG FROM studentattendance WHERE class_id IN (SELECT class_id FROM studentclass WHERE student_id = {sid})").fetchall()
+    num_attend = []
+    for clss in teacherclass:
+        temp =conn.execute(f"SELECT AVG(present) AS AVG FROM studentattendance WHERE class_id = {clss['class_id']}").fetchall()
+        num_attend.append(temp[0]['AVG']*100)
     conn.close()
-    return render_template('teacher.html', teacherclass=teacherclass)
+    names = []
+    for clss in teacherclass:
+        temp = {}
+        temp['class'] = clss['class_name']
+        names.append(temp)
+    attendance = []
+
+    print(names, num_attend)
+    class_list = {'class_name':names,'attendance':num_attend}
+    print(class_list)
+    n = len(class_list)
+    return render_template('teacher.html', teacherclass=teacherclass,class_attendance=class_attendance,num_attend=num_attend,class_list=class_list,n=n)
 
 
 @app.route('/student/<sid>')
@@ -149,15 +167,17 @@ def student(sid):
         temp['class'] = clss['class_name']
         names.append(temp)
     attendance = []
-    # for attend in num_attend:
-    #     temp = {}
-    #     temp['attendance'] = attend['AVG']
-    #     attendance.append(temp)
-    print(names, num_attend)
-    class_list = {'class_name':names,'attendance':num_attend}
+    section = []
+    for clss in class_name:
+        temp={}
+        temp['class_section'] = clss['section']
+        section.append(temp)
+
+    print(names, num_attend,section)
+    class_list = {'class_name':names,'attendance':num_attend,'class_section':section}
     print(class_list)
     n = len(class_list)
-    return render_template('student.html', class_name=class_name,class_attendance=class_attendance,num_attend=num_attend,class_list=class_list,n=n)
+    return render_template('student.html', class_name=class_name,class_attendance=class_attendance,num_attend=num_attend,class_list=class_list,n=n,section=section)
 
 
 if __name__ == "__main__":
