@@ -11,7 +11,9 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light" style="background-color: white">
         <img class="mb-4" src="{{ url_for('static', filename='images/H.png', _external=True) }}" alt="" style="width:200px; height:auto;" href='#'>
+        <h5 class="mb-4">Hello {{ studentname }}! </h5>
     </nav>
+
 
     {% for i in range(n) %}
     <div class="card" style="padding-left: 70px;">
@@ -20,9 +22,11 @@
         <p class="card-text">Attendance Percentage: {{ class_list['attendance'][i]|round }}%</p>
         <p class="card-text">Class Section: {{ class_list['class_section'][i]['class_section'] }} </p>
         <p class="card-text"> <small class="text-muted">
+            <br>
             <button class="btn btn-primary" type="submit">Submit Attendance</button>
 
           </div></small></p>
+          <br>
       </div>
     </div>
   {% endfor %}

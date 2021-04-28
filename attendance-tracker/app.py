@@ -30,6 +30,7 @@ Base.prepare(db.engine, reflect=True)
 # Save references to each table
 User_data = Base.classes.user
 Class_data = Base.classes.classes
+Student_Class_data = Base.classes.studentclass
 import os.path
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -84,6 +85,26 @@ def getID(username):
                     dbID = row[0]
     return dbID
 
+def getFirstName(sid):
+    con = sql.connect(db_path)
+    with con:
+                cur = con.cursor()
+                sel = [
+                    User_data.user_id,
+                    User_data.first_name,
+                    User_data.last_name,
+                    User_data.email,
+                    User_data.password,
+                    User_data.role
+                ]
+                cur.execute("SELECT * FROM user")
+                rows = cur.fetchall()
+                results = db.session.query(*sel).filter(User_data.user_id == sid).all()
+                for row in results:
+                    dbFirstName = row[1]
+    return dbFirstName
+
+
 def getClassName(class_id):
     con = sql.connect(db_path)
     with con:
@@ -126,10 +147,12 @@ def index():
 @app.route('/teacher/<tid>')
 def teacher(tid):
     conn = get_db_connection()
+    teachername=getFirstName(tid)
     teacherclass = conn.execute(f"SELECT * FROM classes WHERE teacher_id = {tid}").fetchall()
     class_name=conn.execute(f"SELECT * FROM classes WHERE class_id IN (SELECT class_id FROM teacherclass WHERE teacher_id = {tid})").fetchall()
     class_attendance=conn.execute(f"SELECT * FROM studentattendance WHERE class_id IN (SELECT class_id FROM teacherclass WHERE teacher_id = {tid})").fetchall()
     # num_attend =conn.execute(f"SELECT AVG(present) AS AVG FROM studentattendance WHERE class_id IN (SELECT class_id FROM studentclass WHERE student_id = {sid})").fetchall()
+    students = conn.execute(f"SELECT * FROM user WHERE user_id IN (SELECT student_id FROM studentclass WHERE class_id IN (SELECT class_id FROM classes WHERE teacher_id = {tid}))").fetchall()
     num_attend = []
     for clss in teacherclass:
         temp =conn.execute(f"SELECT AVG(present) AS AVG FROM studentattendance WHERE class_id = {clss['class_id']}").fetchall()
@@ -144,14 +167,15 @@ def teacher(tid):
 
     print(names, num_attend)
     class_list = {'class_name':names,'attendance':num_attend}
-    print(class_list)
+    print(students[0])
     n = len(class_list)
-    return render_template('teacher.html', teacherclass=teacherclass,class_attendance=class_attendance,num_attend=num_attend,class_list=class_list,n=n)
+    return render_template('teacher.html', teacherclass=teacherclass,class_attendance=class_attendance,num_attend=num_attend,class_list=class_list,n=n,teachername=teachername,students=students)
 
 
 @app.route('/student/<sid>')
 def student(sid):
     conn = get_db_connection()
+    studentname = getFirstName(sid)
     studentclass = conn.execute(f"SELECT class_id FROM studentclass WHERE student_id = {sid}")
     class_name=conn.execute(f"SELECT * FROM classes WHERE class_id IN (SELECT class_id FROM studentclass WHERE student_id = {sid})").fetchall()
     class_attendance=conn.execute(f"SELECT * FROM studentattendance WHERE class_id IN (SELECT class_id FROM studentclass WHERE student_id = {sid})").fetchall()
@@ -175,9 +199,9 @@ def student(sid):
 
     print(names, num_attend,section)
     class_list = {'class_name':names,'attendance':num_attend,'class_section':section}
-    print(class_list)
+    print("Hello", getFirstName(sid))
     n = len(class_list)
-    return render_template('student.html', class_name=class_name,class_attendance=class_attendance,num_attend=num_attend,class_list=class_list,n=n,section=section)
+    return render_template('student.html', class_name=class_name,class_attendance=class_attendance,num_attend=num_attend,class_list=class_list,n=n,section=section,studentname=studentname)
 
 
 if __name__ == "__main__":

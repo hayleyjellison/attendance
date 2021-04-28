@@ -7,18 +7,28 @@
     <title>Teacher Dashboard</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/teacher.css', _external=True) }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light" style="background-color: white">
         <img class="mb-4" src="{{ url_for('static', filename='images/H.png', _external=True) }}" alt="" style="width:200px; height:auto;" href='#'>
+        <h5 class="mb-4">Hello {{ teachername }}! </h5>
     </nav>
 
 {% for i in range(n+1) %}
-  <div class="card">
+
+  <div class="card" style="padding-left: 70px;">
     <div class="card-body">
-      <h5 class="card-title">{{ class_list['class_name'][i]['class'] }} </h5>
+      <a href="#" data-toggle="popover" title="Students" data-content="{{ students['first_name'] }}">{{ class_list['class_name'][i]['class'] }}</a>
       <p class="card-text">Average Attendance Percentage: {{ class_list['attendance'][i]|round }}%</p>
       <p class="card-text"><small class="text-muted"></small></p>
+      <br>
+      <script>
+        $(document).ready(function(){
+            $('[data-toggle="popover"]').popover();   
+        });
+        </script>
     </div>
   </div>
 {% endfor %}
